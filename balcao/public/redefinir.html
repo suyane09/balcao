@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nova senha · Balcão</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#eef1f5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/plataforma.css">
+</head>
+<body>
+<main class="acesso">
+  <div class="caixa">
+    <a class="marca" href="/">balcão</a>
+    <div id="invalido" hidden>
+      <h1>Link inválido ou vencido</h1>
+      <p class="sub">Este link já foi usado ou passou de 1 hora. Peça um novo link para quem cuida do seu Balcão.</p>
+      <a class="botao primario" href="/entrar">Voltar para o login</a>
+    </div>
+    <div id="formulario" hidden>
+      <h1>Crie uma nova senha</h1>
+      <p class="sub">Depois de salvar, você entra com o seu e-mail e a nova senha.</p>
+      <form id="form" novalidate>
+        <div id="erro" class="erro-form" role="alert" hidden></div>
+        <div class="campo"><label for="senha">Nova senha</label><input type="password" id="senha" autocomplete="new-password" minlength="6" required><small>Pelo menos 6 caracteres.</small></div>
+        <div class="campo"><label for="senha2">Repita a nova senha</label><input type="password" id="senha2" autocomplete="new-password" required></div>
+        <button class="botao primario grande" style="width:100%" id="enviar">Salvar nova senha</button>
+      </form>
+    </div>
+  </div>
+</main>
+<script type="module">
+import { api } from '/js/comum.js';
+const $ = (id) => document.getElementById(id);
+const token = new URLSearchParams(location.search).get('token') || '';
+history.replaceState(null, '', '/redefinir');
+api('GET', `/api/redefinir/validar?token=${encodeURIComponent(token)}`)
+  .then((r) => { $(r.valido ? 'formulario' : 'invalido').hidden = false; })
+  .catch(() => { $('invalido').hidden = false; });
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const erro = $('erro'); erro.hidden = true;
+  if ($('senha').value !== $('senha2').value) { erro.textContent = 'As duas senhas precisam ser iguais.'; erro.hidden = false; return; }
+  const botao = $('enviar'); botao.disabled = true;
+  try {
+    await api('POST', '/api/redefinir', { token, senha: $('senha').value });
+    location.href = '/entrar';
+  } catch (err) { erro.textContent = err.message; erro.hidden = false; botao.disabled = false; }
+});
+</script>
+</body>
+</html>

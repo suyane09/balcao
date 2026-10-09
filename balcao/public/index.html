@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balcão · delivery com a sua marca e sem comissão por pedido</title>
+<meta name="description" content="Monte o cardápio do seu restaurante, tenha um link só seu e receba os pedidos direto no WhatsApp e no painel. Sem comissão por pedido.">
+<meta name="theme-color" content="#121a2b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/plataforma.css">
+</head>
+<body>
+<header class="topo-site">
+  <a class="marca" href="/" aria-label="Balcão, página inicial">balcão</a>
+  <nav aria-label="Principal">
+    <a class="oculta-mobile" href="#como-funciona">Como funciona</a>
+    <a class="oculta-mobile" href="#conta">Quanto você economiza</a>
+    <a class="oculta-mobile" href="#preco">Preço</a>
+    <a href="/entrar">Entrar</a>
+    <a class="botao primario pequeno" href="/cadastro">Criar minha loja</a>
+  </nav>
+</header>
+
+<main>
+  <section class="heroi">
+    <div>
+      <h1>Seu delivery com a sua cara e sem comissão por pedido</h1>
+      <p class="sub">Cadastre seu restaurante, monte o cardápio e receba os pedidos no painel e no WhatsApp. Um link só seu, com a sua marca.</p>
+      <div class="acoes">
+        <a class="botao primario grande" href="/cadastro">Criar minha loja grátis</a>
+        <a class="botao grande" href="#conta">Calcular minha economia</a>
+      </div>
+      <p class="nota">7 dias grátis. Não pede cartão de crédito.</p>
+    </div>
+    <aside aria-label="Exemplo de pedido recebido">
+      <div class="comanda">
+        <h3>Pedido #128</h3>
+        <div class="meta">Hamburgueria do Zé · 19:42</div>
+        <hr>
+        <div class="linha"><span>2x Smash duplo</span><span>56,00</span></div>
+        <div class="extra">+ bacon, sem cebola</div>
+        <div class="linha"><span>1x Batata média</span><span>14,00</span></div>
+        <div class="linha"><span>Entrega</span><span>5,00</span></div>
+        <hr>
+        <div class="linha total"><span>Total</span><span>R$ 75,00</span></div>
+        <div class="meta">Pix · Rua das Flores, 120</div>
+        <div class="selo">Chegou pelo seu link</div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="faixa" id="como-funciona">
+    <h2>Da inscrição ao primeiro pedido em uma tarde</h2>
+    <ol class="passos">
+      <li><h3>Cadastre seu restaurante</h3><p>Nome e WhatsApp. Sua loja já nasce com um endereço próprio, no formato seudominio.com.br/suahamburgueria.</p></li>
+      <li><h3>Monte o cardápio</h3><p>Categorias, fotos, preços e adicionais. Tudo pelo celular, sem precisar de programador.</p></li>
+      <li><h3>Divulgue o link</h3><p>Coloque no Instagram, no Google e em um QR code na embalagem. Cada pedido aparece no painel e vira uma mensagem no seu WhatsApp.</p></li>
+    </ol>
+  </section>
+
+  <div class="bloco-escuro" id="conta">
+    <section class="faixa">
+      <h2>Quanto você deixa de taxa nos aplicativos?</h2>
+      <div class="calc">
+        <div>
+          <div class="controle">
+            <label for="vendas">Vendas por mês nos aplicativos <output id="vendas-v"></output></label>
+            <input type="range" id="vendas" min="2000" max="60000" step="500" value="10000">
+          </div>
+          <div class="controle">
+            <label for="pct">Parte dos pedidos que você levaria para o seu link <output id="pct-v"></output></label>
+            <input type="range" id="pct" min="5" max="50" step="5" value="20">
+          </div>
+          <p class="nota-calc">A conta usa 12% de comissão mais 3,2% de taxa de pagamento online, valores do plano básico do iFood em junho de 2026. Confira os números do seu contrato. Entrega própria e taxas da maquininha ou do Pix não entram.</p>
+        </div>
+        <div class="resultado" aria-live="polite">
+          <div class="linha-r"><span>Taxas que você paga hoje</span><strong id="taxas"></strong></div>
+          <div class="linha-r"><span>Taxas evitadas no seu link</span><strong id="economia"></strong></div>
+          <div class="linha-r"><span>Plano do Balcão</span><strong>R$&nbsp;79</strong></div>
+          <div class="destaque"><span id="sobra-txt">Sobra no seu bolso por mês</span><strong id="sobra"></strong></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="faixa">
+    <h2>Tudo o que um restaurante pequeno precisa para vender direto</h2>
+    <dl class="recursos">
+      <div><dt>Loja com a sua marca</dt><dd>Logo, banner, cor, fonte e tema claro ou escuro. O cliente vê o seu restaurante, não o nosso.</dd></div>
+      <div><dt>Pedido no painel e no WhatsApp</dt><dd>O painel avisa com som cada pedido novo. O cliente envia o pedido pronto para o seu WhatsApp.</dd></div>
+      <div><dt>Adicionais e observações</dt><dd>Bacon extra, queijo, sem cebola. O pedido chega do jeito que o cliente quer.</dd></div>
+      <div><dt>Taxa de entrega e pedido mínimo</dt><dd>Defina os valores uma vez e o carrinho calcula o total.</dd></div>
+      <div><dt>Abrir e fechar com um toque</dt><dd>Acabou o estoque ou fechou o balcão? A loja para de receber pedidos na hora.</dd></div>
+      <div><dt>Link e QR code</dt><dd>Imprima o QR code e cole na sacola de quem pede pelo aplicativo. Na próxima vez, ele pede direto com você.</dd></div>
+      <div><dt>Cardápio sempre certo</dt><dd>Mude preço, esgote um item ou crie uma promoção em segundos, pelo celular.</dd></div>
+      <div><dt>Os clientes são seus</dt><dd>Nome, telefone e endereço ficam no pedido, para você chamar de novo.</dd></div>
+    </dl>
+  </section>
+
+  <section class="faixa" id="preco">
+    <div class="preco">
+      <div>
+        <h2>Um preço fixo, não importa quanto você vende</h2>
+        <p style="margin-top:1rem;color:var(--tinta-2);max-width:44ch">Sem comissão por pedido e sem taxa para ativar. Quanto mais você vende pelo seu link, mais sobra para você.</p>
+      </div>
+      <div>
+        <div class="valor">R$&nbsp;79<small> por mês</small></div>
+        <ul>
+          <li>7 dias grátis para testar, sem cartão</li>
+          <li>Pedidos ilimitados</li>
+          <li>Loja, painel de pedidos e QR code</li>
+          <li>Ajuda pelo WhatsApp para montar o cardápio</li>
+        </ul>
+        <a class="botao primario grande" href="/cadastro">Começar o teste grátis</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="faixa faq" aria-labelledby="duvidas">
+    <h2 id="duvidas">Perguntas frequentes</h2>
+    <details><summary>Preciso sair do iFood ou do Anota Aí?</summary><p>Não. Use o Balcão ao lado deles. O aplicativo traz clientes novos, e o seu link fica para quem já conhece seu restaurante.</p></details>
+    <details><summary>Como o cliente paga?</summary><p>Na entrega ou na retirada, por Pix, cartão ou dinheiro, combinado direto com você. Por enquanto não existe pagamento online dentro da loja.</p></details>
+    <details><summary>Como recebo os pedidos?</summary><p>No painel, que toca um aviso a cada pedido novo, e em uma mensagem no seu WhatsApp enviada pelo cliente com tudo detalhado.</p></details>
+    <details><summary>Funciona no celular?</summary><p>Sim. A loja do cliente e o painel foram feitos para o celular. Você pode deixar o painel aberto em um tablet na cozinha.</p></details>
+    <details><summary>Posso cancelar quando quiser?</summary><p>Pode. Se o plano vencer, a loja fica indisponível até a renovação, e seu cardápio continua guardado.</p></details>
+  </section>
+</main>
+
+<footer class="rodape">
+  <a class="marca" href="/">balcão</a>
+  <p style="margin-top:.5rem">Delivery com a marca do seu restaurante.</p>
+</footer>
+<script type="module" src="/js/landing.js"></script>
+</body>
+</html>

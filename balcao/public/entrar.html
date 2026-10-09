@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrar · Balcão</title>
+<meta name="theme-color" content="#eef1f5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/plataforma.css">
+</head>
+<body>
+<main class="acesso">
+  <div class="caixa">
+    <a class="marca" href="/">balcão</a>
+    <h1>Entrar</h1>
+    <p class="sub">Acesse o painel do seu restaurante.</p>
+    <form id="form" novalidate>
+      <div id="erro" class="erro-form" role="alert" hidden></div>
+      <div class="campo"><label for="email">E-mail</label><input type="email" id="email" autocomplete="email" required></div>
+      <div class="campo"><label for="senha">Senha</label><input type="password" id="senha" autocomplete="current-password" required></div>
+      <button class="botao primario grande" style="width:100%" id="enviar">Entrar</button>
+      <p class="troca" style="margin-top:1rem"><a id="esqueci" href="/redefinir" hidden>Esqueci minha senha</a></p>
+    </form>
+    <p class="troca">Ainda não tem loja? <a href="/cadastro">Criar minha loja</a></p>
+  </div>
+</main>
+<script type="module">
+import { api } from '/js/comum.js';
+const $ = (id) => document.getElementById(id);
+api('GET', '/api/eu').then((d) => {
+  if (d.usuario) { location.replace('/painel'); return; }
+  const link = $('esqueci');
+  link.hidden = false;
+  if (d.plataformaWhatsapp) {
+    link.href = `https://wa.me/${d.plataformaWhatsapp}?text=${encodeURIComponent('Olá! Esqueci a senha do meu painel no Balcão. Pode me enviar um link para criar outra?')}`;
+    link.target = '_blank'; link.rel = 'noopener';
+  } else {
+    link.href = '#'; link.addEventListener('click', (e) => { e.preventDefault(); $('erro').textContent = 'Fale com quem te vendeu o Balcão para receber um link de nova senha.'; $('erro').hidden = false; });
+  }
+}).catch(() => {});
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const erro = $('erro'); erro.hidden = true;
+  const botao = $('enviar'); botao.disabled = true; botao.textContent = 'Entrando...';
+  try {
+    await api('POST', '/api/entrar', { email: $('email').value, senha: $('senha').value });
+    location.href = '/painel';
+  } catch (err) {
+    erro.textContent = err.message; erro.hidden = false;
+    botao.disabled = false; botao.textContent = 'Entrar';
+  }
+});
+</script>
+</body>
+</html>

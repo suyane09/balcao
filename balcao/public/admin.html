@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · Balcão</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/plataforma.css">
+</head>
+<body>
+<header class="painel-topo"><div class="interno">
+  <a class="marca" href="/">balcão</a><span class="nome-loja">Administração</span>
+  <a class="botao pequeno" href="/painel">Meu painel</a>
+</div></header>
+<main class="conteudo">
+  <div class="cabecalho-sessao"><h2>Restaurantes cadastrados</h2><span id="resumo" class="etiqueta"></span></div>
+  <div id="erro" class="erro-form" role="alert" hidden></div>
+  <div class="tabela-rolagem"><table class="tabela">
+    <thead><tr><th>Restaurante</th><th>Dono</th><th>Pedidos</th><th>Plano até</th><th>Situação</th><th>Ações</th></tr></thead>
+    <tbody id="linhas"><tr><td colspan="6">Carregando...</td></tr></tbody>
+  </table></div>
+  <p style="margin-top:1rem;color:var(--suave)">Quando o restaurante pagar a mensalidade, use "+30 dias". O plano soma a partir do vencimento, ou de hoje se já tiver vencido.</p>
+</main>
+<dialog class="modal" id="dialogo-senha">
+  <div style="padding:1.4rem">
+    <h2>Link para nova senha</h2>
+    <p style="margin-bottom:1rem;color:var(--suave)">Para <strong id="nome-senha"></strong>. O link vale por 1 hora e só pode ser usado uma vez.</p>
+    <div class="link-copia"><input type="text" id="link-senha" readonly aria-label="Link de nova senha"><button class="botao" id="copiar-link">Copiar</button></div>
+    <div class="rodape-modal" style="margin-top:1rem">
+      <button class="botao" data-fechar>Fechar</button>
+      <a class="botao primario" id="enviar-senha" target="_blank" rel="noopener">Enviar pelo WhatsApp</a>
+    </div>
+  </div>
+</dialog>
+<script type="module">
+import { api, esc, aviso } from '/js/comum.js';
+const corpo = document.getElementById('linhas');
+const dataBR = (iso) => iso.split('-').reverse().join('/');
+
+async function carregar() {
+  const lojas = await api('GET', '/api/admin/lojas');
+  const vigentes = lojas.filter((l) => l.vigente).length;
+  document.getElementById('resumo').textContent = `${lojas.length} lojas · ${vigentes} com plano em dia`;
+  corpo.innerHTML = lojas.length ? lojas.map((l) => `
+    <tr>
+      <td><strong>${esc(l.nome)}</strong><br><a href="/${esc(l.slug)}" target="_blank" rel="noopener">/${esc(l.slug)}</a></td>
+      <td>${esc(l.dono)}<br><small>${esc(l.email)}</small></td>
+      <td>${l.pedidos}</td>
+      <td>${dataBR(l.vencimento)}</td>
+      <td><span class="etiqueta ${l.vigente ? 'ok' : 'erro'}">${l.vigente ? 'Em dia' : (l.ativa ? 'Vencida' : 'Desativada')}</span></td>
+      <td><div class="acoes">
+        <button class="botao pequeno primario" data-id="${l.id}" data-dias="30">+30 dias</button>
+        <button class="botao pequeno" data-id="${l.id}" data-ativa="${l.ativa ? 0 : 1}">${l.ativa ? 'Desativar' : 'Reativar'}</button>
+        <button class="botao pequeno" data-id="${l.id}" data-senha="1" data-whats="${l.whatsapp}" data-nome="${esc(l.nome)}">Link de senha</button>
+        <a class="botao pequeno" target="_blank" rel="noopener" href="https://wa.me/${l.whatsapp}">WhatsApp</a>
+      </div></td>
+    </tr>`).join('') : '<tr><td colspan="6">Nenhum restaurante cadastrado ainda.</td></tr>';
+}
+
+const dialogo = document.getElementById('dialogo-senha');
+dialogo.addEventListener('click', (e) => { if (e.target === dialogo || e.target.closest('[data-fechar]')) dialogo.close(); });
+document.getElementById('copiar-link').addEventListener('click', async () => {
+  const campo = document.getElementById('link-senha');
+  try { await navigator.clipboard.writeText(campo.value); aviso('Link copiado.'); } catch { campo.select(); aviso('Selecione e copie o link.'); }
+});
+
+corpo.addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-id]'); if (!b) return;
+  if (b.dataset.senha) {
+    try {
+      const { url } = await api('POST', `/api/admin/lojas/${b.dataset.id}/redefinir`);
+      document.getElementById('nome-senha').textContent = b.dataset.nome;
+      document.getElementById('link-senha').value = url;
+      const texto = `Olá! Aqui está o link para você criar uma nova senha no Balcão. Ele vale por 1 hora e só pode ser usado uma vez: ${url}`;
+      document.getElementById('enviar-senha').href = `https://wa.me/${b.dataset.whats}?text=${encodeURIComponent(texto)}`;
+      dialogo.showModal();
+    } catch (err) { aviso(err.message, 'erro'); }
+    return;
+  }
+  try {
+    await api('PATCH', `/api/admin/lojas/${b.dataset.id}`, b.dataset.dias ? { somarDias: Number(b.dataset.dias) } : { ativa: b.dataset.ativa === '1' });
+    await carregar(); aviso('Atualizado.');
+  } catch (err) { aviso(err.message, 'erro'); }
+});
+
+api('GET', '/api/eu').then((eu) => {
+  if (!eu.usuario) { location.replace('/entrar'); return; }
+  if (!eu.admin) { document.getElementById('erro').textContent = 'Esta área é só para o administrador da plataforma. Defina ADMIN_EMAIL no servidor com o seu e-mail.'; document.getElementById('erro').hidden = false; corpo.innerHTML = ''; return; }
+  return carregar();
+}).catch((err) => { document.getElementById('erro').textContent = err.message; document.getElementById('erro').hidden = false; });
+</script>
+</body>
+</html>

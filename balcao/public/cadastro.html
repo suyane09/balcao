@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Criar minha loja · Balcão</title>
+<meta name="theme-color" content="#eef1f5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/plataforma.css">
+</head>
+<body>
+<main class="acesso">
+  <div class="caixa">
+    <a class="marca" href="/">balcão</a>
+    <h1>Crie a sua loja</h1>
+    <p class="sub">7 dias grátis, sem cartão de crédito.</p>
+    <form id="form" novalidate>
+      <div id="erro" class="erro-form" role="alert" hidden></div>
+      <div class="campo"><label for="loja">Nome do restaurante</label><input type="text" id="loja" autocomplete="organization" required maxlength="60"></div>
+      <div class="campo"><label for="whatsapp">WhatsApp do restaurante</label><input type="tel" id="whatsapp" inputmode="tel" placeholder="(82) 99999-9999" autocomplete="tel" required><small>Os pedidos chegam nesse número.</small></div>
+      <div class="campo"><label for="nome">Seu nome</label><input type="text" id="nome" autocomplete="name" required maxlength="60"></div>
+      <div class="campo"><label for="email">E-mail</label><input type="email" id="email" autocomplete="email" required></div>
+      <div class="campo"><label for="senha">Senha</label><input type="password" id="senha" autocomplete="new-password" minlength="6" required><small>Pelo menos 6 caracteres.</small></div>
+      <button class="botao primario grande" style="width:100%" id="enviar">Criar minha loja</button>
+    </form>
+    <p class="troca">Já tem conta? <a href="/entrar">Entrar</a></p>
+  </div>
+</main>
+<script type="module">
+import { api, mascaraTelefone } from '/js/comum.js';
+const $ = (id) => document.getElementById(id);
+mascaraTelefone($('whatsapp'));
+api('GET', '/api/eu').then((d) => { if (d.usuario) location.replace('/painel'); }).catch(() => {});
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const erro = $('erro'); erro.hidden = true;
+  const botao = $('enviar'); botao.disabled = true; botao.textContent = 'Criando sua loja...';
+  try {
+    await api('POST', '/api/cadastro', {
+      loja: $('loja').value, whatsapp: $('whatsapp').value, nome: $('nome').value,
+      email: $('email').value, senha: $('senha').value,
+    });
+    location.href = '/painel';
+  } catch (err) {
+    erro.textContent = err.message; erro.hidden = false;
+    botao.disabled = false; botao.textContent = 'Criar minha loja';
+  }
+});
+</script>
+</body>
+</html>
