@@ -120,8 +120,8 @@ function renderPagina() {
       <nav class="nav-cat" aria-label="Categorias"><div class="trilha">${categorias.map((c, i) => `<a href="#cat-${c.id}" data-cat="${c.id}" class="${i === 0 ? 'ativa' : ''}">${esc(c.nome)}</a>`).join('')}</div></nav>
       ${categorias.map((c) => `
         <section class="secao" id="cat-${c.id}"><h2>${esc(c.nome)}</h2>
-          <div class="itens">${c.produtos.map((p) => `
-            <button class="item ${p.imagem ? '' : 'sem-foto'} ${p.disponivel ? '' : 'esgotado'}" data-prod="${p.id}" ${p.disponivel ? '' : 'disabled'}>
+          <div class="itens">${c.produtos.map((p, ix) => `
+            <button class="item ${p.imagem ? '' : 'sem-foto'} ${p.disponivel ? '' : 'esgotado'}" style="--i:${Math.min(ix, 10)}" data-prod="${p.id}" ${p.disponivel ? '' : 'disabled'}>
               <div><div class="nome">${esc(p.nome)}</div>
                 ${p.descricao ? `<div class="desc">${esc(p.descricao)}</div>` : ''}
                 ${p.disponivel ? `<div class="preco">${brl(p.preco)}</div>` : '<div class="tag">Esgotado</div>'}</div>
@@ -182,50 +182,93 @@ function atualizarBarra() {
   gravarLocal('carrinho', carrinho);
 }
 
+const reduzMovimento = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 function abrirFolha(html) {
   const d = document.createElement('dialog');
   d.className = 'folha';
   d.innerHTML = html;
   d.addEventListener('close', () => d.remove());
-  d.addEventListener('click', (e) => { if (e.target === d) d.close(); });
+  /* fecha com animação de saída (Esc, clique fora e botões passam por aqui) */
+  d.fechar = () => {
+    if (!d.open || d.classList.contains('saindo')) return;
+    if (reduzMovimento()) { d.close(); return; }
+    d.classList.add('saindo');
+    d.addEventListener('animationend', (e) => { if (e.target === d && e.animationName.startsWith('folha-sai')) d.close(); });
+    setTimeout(() => d.close(), 450);
+  };
+  d.addEventListener('cancel', (e) => { e.preventDefault(); d.fechar(); });
+  d.addEventListener('click', (e) => { if (e.target === d) d.fechar(); });
   document.body.append(d);
   d.showModal();
   return d;
+}
+
+/* bolinha que voa do botão "Adicionar" até a barra do carrinho */
+function voarParaCarrinho(de) {
+  const alvo = document.querySelector('#abrir-carrinho .qtd') || document.getElementById('abrir-carrinho');
+  if (!de || !alvo || reduzMovimento()) return;
+  const b = alvo.getBoundingClientRect();
+  const x0 = de.left + de.width / 2 - 14; const y0 = de.top + de.height / 2 - 14;
+  const x1 = b.left + b.width / 2 - 14; const y1 = b.top + b.height / 2 - 14;
+  const bola = document.createElement('div');
+  bola.className = 'voando';
+  document.body.append(bola);
+  bola.animate([
+    { transform: `translate(${x0}px, ${y0}px) scale(1)`, opacity: 1 },
+    { transform: `translate(${(x0 + x1) / 2}px, ${Math.min(y0, y1) - 80}px) scale(1.15)`, opacity: 1, offset: 0.45 },
+    { transform: `translate(${x1}px, ${y1}px) scale(.35)`, opacity: 0.9 },
+  ], { duration: 620, easing: 'cubic-bezier(.45,0,.2,1)' }).onfinish = () => {
+    bola.remove();
+    const botao = document.getElementById('abrir-carrinho');
+    botao?.classList.remove('pulou'); void botao?.offsetWidth; botao?.classList.add('pulou');
+  };
 }
 
 function abrirProduto(p) {
   if (!p) return;
   const aberta = dados.loja.aberta;
   let qtd = 1;
+  let ultimo = null;
   const d = abrirFolha(`
     <button class="fechar ${p.imagem ? '' : 'sem-foto'}" aria-label="Fechar" data-fechar>✕</button>
     <div class="corpo">
       ${p.imagem ? `<div class="foto-grande" style="background-image:url('${esc(p.imagem)}')"></div>` : ''}
-      <h2 ${p.imagem ? '' : 'style="padding-right:2.6rem"'}>${esc(p.nome)}</h2>
-      ${p.descricao ? `<p style="color:var(--suave)">${esc(p.descricao)}</p>` : ''}
-      <p style="font-weight:800;margin-top:.5rem">${brl(p.preco)}</p>
-      ${p.adicionais.length ? `<span class="rotulo-bloco">Adicionais</span>${p.adicionais.map((a, i) => `
-        <label class="adicional"><span class="esq"><input type="checkbox" value="${i}"> ${esc(a.nome)}</span><span>${a.preco ? `+ ${brl(a.preco)}` : 'grátis'}</span></label>`).join('')}` : ''}
-      <label class="rotulo-bloco" for="obs-item">Alguma observação?</label>
-      <textarea id="obs-item" maxlength="120" placeholder="Ex.: sem cebola, ponto da carne..."></textarea>
+      <div class="conteudo ${p.imagem ? '' : 'sem-foto-topo'}">
+        <h2>${esc(p.nome)}</h2>
+        ${p.descricao ? `<p class="desc-produto">${esc(p.descricao)}</p>` : ''}
+        <div class="preco-grande">${brl(p.preco)}</div>
+        ${p.adicionais.length ? `<div class="titulo-grupo"><span>Adicionais</span><small>Opcional</small></div>${p.adicionais.map((a, i) => `
+          <label class="adicional"><span class="esq"><input type="checkbox" value="${i}"><span>${esc(a.nome)}</span></span><span class="preco-adic">${a.preco ? `+ ${brl(a.preco)}` : 'grátis'}</span></label>`).join('')}` : ''}
+        <label class="rotulo-bloco" for="obs-item">Alguma observação?</label>
+        <textarea id="obs-item" maxlength="120" placeholder="Ex.: sem cebola, ponto da carne..."></textarea>
+        <div class="contador"><span id="cont">0</span>/120</div>
+      </div>
     </div>
     <div class="pe">
       <div class="passos-qtd"><button type="button" data-menos aria-label="Diminuir">−</button><output id="qtd">1</output><button type="button" data-mais aria-label="Aumentar">+</button></div>
       <button class="botao-marca" id="adicionar" ${aberta ? '' : 'disabled'}></button>
     </div>`);
+  d.classList.add('produto');
   const botao = d.querySelector('#adicionar');
   const escolhidos = () => [...d.querySelectorAll('.adicional input:checked')].map((i) => p.adicionais[Number(i.value)]);
   const unitario = () => p.preco + escolhidos().reduce((s, a) => s + a.preco, 0);
+  const pulsar = (el) => { el.classList.remove('tic'); void el.offsetWidth; el.classList.add('tic'); };
   const atualizar = () => {
-    d.querySelector('#qtd').textContent = qtd;
-    botao.textContent = aberta ? `Adicionar · ${brl(unitario() * qtd)}` : 'Loja fechada';
+    const saida = d.querySelector('#qtd');
+    if (saida.textContent !== String(qtd)) pulsar(saida);
+    saida.textContent = qtd;
+    const texto = aberta ? `Adicionar · ${brl(unitario() * qtd)}` : 'Loja fechada';
+    if (botao.textContent !== texto) { botao.textContent = texto; if (ultimo !== null) pulsar(botao); }
+    ultimo = texto;
   };
   d.addEventListener('click', (e) => {
-    if (e.target.closest('[data-fechar]')) d.close();
+    if (e.target.closest('[data-fechar]')) d.fechar();
     if (e.target.closest('[data-menos]')) { qtd = Math.max(1, qtd - 1); atualizar(); }
     if (e.target.closest('[data-mais]')) { qtd = Math.min(50, qtd + 1); atualizar(); }
   });
   d.addEventListener('change', atualizar);
+  d.querySelector('#obs-item').addEventListener('input', (e) => { d.querySelector('#cont').textContent = e.target.value.length; });
   botao.addEventListener('click', () => {
     const adicionais = escolhidos().map((a) => a.nome).sort();
     const obs = d.querySelector('#obs-item').value.trim();
@@ -233,7 +276,10 @@ function abrirProduto(p) {
     if (existente) existente.qtd = Math.min(50, existente.qtd + qtd);
     else carrinho.push({ produtoId: p.id, nome: p.nome, preco: unitario(), qtd, adicionais, obs });
     atualizarBarra();
-    d.close();
+    const origem = botao.getBoundingClientRect();
+    botao.disabled = true; botao.classList.add('ok'); botao.textContent = '✓ Adicionado';
+    d.addEventListener('close', () => voarParaCarrinho(origem), { once: true });
+    setTimeout(() => d.fechar(), reduzMovimento() ? 0 : 380);
   });
   atualizar();
 }
@@ -247,6 +293,7 @@ function renderCarrinhoPagina() {
   const ROTULO = { pix: 'Pix', cartao: 'Cartão (na entrega)', dinheiro: 'Dinheiro' };
   let erro = '';
   let resposta = null;
+  let primeira = true;
 
   const temBairros = () => l.bairros.length > 0;
   const bairroEscolhido = () => l.bairros.find((b) => b.nome === form.bairro);
@@ -276,7 +323,7 @@ function renderCarrinhoPagina() {
     const botao = `<button type="submit" form="form-pedido" class="botao-marca" data-enviar ${bloqueado ? 'disabled' : ''}>${rotuloBotao}</button>`;
 
     $app.innerHTML = `
-      <div class="pagina-carrinho">
+      <div class="pagina-carrinho ${primeira ? 'entrando' : ''}">
         ${topo}
         <h1>Seu pedido<span class="contagem">${n} ${n === 1 ? 'item' : 'itens'}</span></h1>
         ${l.aberta ? '' : '<div class="faixa-fechada" style="margin:0 0 1rem" role="status">Estamos fechados agora. Os pedidos só voltam quando a loja abrir.</div>'}
@@ -341,6 +388,7 @@ function renderCarrinhoPagina() {
         </form>
         <div class="barra-enviar"><div class="conteudo"><div class="total-mini"><small>Total</small><strong>${brl(total)}</strong></div>${botao}</div></div>
       </div>`;
+    primeira = false;
     mascaraTelefone($app.querySelector('#f-fone'));
   }
 

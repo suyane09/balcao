@@ -63,7 +63,7 @@ a { color: inherit; }
 .item:hover { border-color: var(--marca); transform: translateY(-1px); box-shadow: 0 10px 22px -16px rgba(0, 0, 0, .55); }
 .item.sem-foto { grid-template-columns: 1fr; }
 .item .nome { font-weight: 700; font-size: 1.02rem; }
-.item .desc { color: var(--suave); font-size: .9rem; margin: .2rem 0 .5rem; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.item .desc { color: var(--suave); font-size: .9rem; margin: .2rem 0 .5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .item .preco { font-weight: 800; color: var(--marca); }
 .item .mais { position: absolute; right: 6px; bottom: 6px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--marca); color: var(--marca-texto); font-weight: 700; font-size: 1.15rem; line-height: 1; box-shadow: 0 4px 10px -3px rgba(0, 0, 0, .5); }
 .item .foto { width: 104px; height: 104px; border-radius: 12px; background: var(--linha) center / cover no-repeat; position: relative; }
@@ -179,3 +179,84 @@ a.botao-claro { margin-top: .7rem; }
   .pagina-carrinho { padding-bottom: 3rem; }
 }
 @media (max-width: 899px) { .resumo-lateral .botao-marca { display: none; } }
+
+/* ===== janela do produto ===== */
+.folha .fechar { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background: rgba(0, 0, 0, .5); transition: transform .25s, background .2s; }
+.folha .fechar:hover { transform: rotate(90deg); background: rgba(0, 0, 0, .7); }
+.folha .fechar.sem-foto { backdrop-filter: none; background: color-mix(in srgb, var(--texto) 10%, transparent); }
+.folha.produto .corpo { padding: 0 0 .6rem; }
+.produto .foto-grande { height: 250px; margin: 0; position: relative; overflow: hidden; background-color: var(--linha); background-size: cover; background-position: center; }
+.produto .foto-grande::after { content: ''; position: absolute; inset: auto 0 0 0; height: 110px; background: linear-gradient(transparent, var(--cartao)); }
+.produto .conteudo { position: relative; z-index: 1; padding: 0 1.3rem 1rem; margin-top: -34px; }
+.produto .conteudo.sem-foto-topo { margin-top: 0; padding-top: 1.5rem; }
+.produto h2 { font-family: var(--fonte-titulo); font-size: 1.6rem; line-height: 1.15; letter-spacing: -0.02em; margin: 0; padding-right: 2.4rem; }
+.desc-produto { color: var(--suave); margin-top: .45rem; line-height: 1.5; }
+.preco-grande { display: inline-block; margin-top: .8rem; padding: .3rem .8rem; border-radius: 10px; font-weight: 800; font-size: 1.1rem; color: var(--marca); background: color-mix(in srgb, var(--marca) 12%, transparent); }
+.titulo-grupo { display: flex; justify-content: space-between; align-items: center; margin: 1.4rem 0 .6rem; font-weight: 750; font-size: 1.02rem; }
+.titulo-grupo small { font-weight: 650; font-size: .74rem; color: var(--suave); padding: .18rem .6rem; border-radius: 999px; background: color-mix(in srgb, var(--texto) 8%, transparent); }
+.folha .adicional { border: 1.5px solid var(--linha); border-radius: 14px; padding: .8rem .95rem; margin-bottom: .5rem; transition: border-color .18s, background .18s, transform .12s; }
+.folha .adicional:active { transform: scale(.985); }
+.folha .adicional:has(input:checked) { border-color: var(--marca); background: color-mix(in srgb, var(--marca) 11%, transparent); }
+.folha .adicional .esq { gap: .75rem; font-weight: 600; }
+.preco-adic { color: var(--suave); font-size: .92rem; font-weight: 650; }
+.folha .adicional input { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--linha); display: grid; place-items: center; transition: background .18s, border-color .18s, transform .18s; }
+.folha .adicional input::after { content: '✓'; font-size: .85rem; font-weight: 900; color: var(--marca-texto); transform: scale(0); transition: transform .2s cubic-bezier(.3, 1.6, .5, 1); }
+.folha .adicional input:checked { background: var(--marca); border-color: var(--marca); transform: scale(1.06); }
+.folha .adicional input:checked::after { transform: scale(1); }
+.contador { text-align: right; font-size: .75rem; color: var(--suave); margin-top: .25rem; }
+.produto .pe { box-shadow: 0 -10px 24px -18px rgba(0, 0, 0, .5); }
+.botao-marca { transition: transform .12s, filter .15s, background .2s; }
+.botao-marca:not([disabled]):hover { filter: brightness(1.06); }
+.botao-marca:not([disabled]):active { transform: scale(.98); }
+.botao-marca.ok { background: #1fa855; color: #fff; opacity: 1; }
+.voando { position: fixed; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--marca); box-shadow: 0 6px 16px -4px rgba(0, 0, 0, .6); z-index: 9999; pointer-events: none; }
+
+/* ===== animações ===== */
+@keyframes entrar { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes folha-entra { from { opacity: 0; transform: translateY(32px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes folha-entra-mobile { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes folha-sai { to { opacity: 0; transform: translateY(24px) scale(.97); } }
+@keyframes folha-sai-mobile { to { transform: translateY(100%); } }
+@keyframes fundo-entra { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fundo-sai { to { opacity: 0; } }
+@keyframes zoom-foto { from { transform: scale(1.12); } to { transform: scale(1); } }
+@keyframes tic { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes pop { 0% { transform: scale(0); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+@keyframes barra-sobe { from { transform: translateY(120%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes barra-pula { 0% { transform: scale(1); } 35% { transform: scale(1.04); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: no-preference) {
+  .identidade { animation: entrar .5s cubic-bezier(.2, .8, .3, 1) backwards; }
+  .nav-cat { animation: entrar .5s .08s backwards; }
+  .secao > h2 { animation: entrar .45s .12s backwards; }
+  .item { animation: entrar .5s calc(.1s + var(--i, 0) * 55ms) cubic-bezier(.2, .8, .3, 1) backwards; }
+  .item:active { transform: scale(.985); }
+  .item .foto { transition: transform .35s cubic-bezier(.2, .8, .3, 1); }
+  .item:hover .foto { transform: scale(1.04); }
+  .nav-cat a { transition: background .2s, color .2s, border-color .2s; }
+
+  dialog.folha[open] { animation: folha-entra .38s cubic-bezier(.2, .85, .3, 1) both; }
+  dialog.folha[open]::backdrop { animation: fundo-entra .3s ease-out both; }
+  dialog.folha.saindo { animation: folha-sai .22s ease-in forwards; }
+  dialog.folha.saindo::backdrop { animation: fundo-sai .22s ease-in forwards; }
+  @media (max-width: 640px) {
+    dialog.folha[open] { animation-name: folha-entra-mobile; animation-duration: .42s; }
+    dialog.folha.saindo { animation-name: folha-sai-mobile; animation-duration: .26s; }
+  }
+  .produto .foto-grande { animation: zoom-foto .7s cubic-bezier(.2, .8, .3, 1) both; }
+  .produto .conteudo > * { animation: entrar .45s backwards; }
+  .produto .conteudo > :nth-child(1) { animation-delay: .12s; }
+  .produto .conteudo > :nth-child(2) { animation-delay: .17s; }
+  .produto .conteudo > :nth-child(3) { animation-delay: .22s; }
+  .produto .conteudo > :nth-child(4) { animation-delay: .27s; }
+  .produto .conteudo > :nth-child(n+5) { animation-delay: .32s; }
+  .tic { animation: tic .28s ease-out; }
+
+  .barra-carrinho:not([hidden]) button { animation: barra-sobe .45s cubic-bezier(.2, .9, .3, 1.15) both; }
+  .barra-carrinho button.pulou { animation: barra-pula .4s ease-out; }
+  .sucesso .selo { animation: pop .55s cubic-bezier(.3, 1.4, .5, 1) both; }
+  .pagina-carrinho.entrando .bloco { animation: entrar .5s backwards; }
+  .pagina-carrinho.entrando .coluna-principal > :nth-child(2) { animation-delay: .07s; }
+  .pagina-carrinho.entrando .coluna-principal > :nth-child(3) { animation-delay: .14s; }
+  .pagina-carrinho.entrando .coluna-principal > :nth-child(4) { animation-delay: .21s; }
+  .pagina-carrinho.entrando .resumo-lateral { animation-delay: .1s; }
+}
